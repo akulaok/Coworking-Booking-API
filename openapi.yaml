@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: API для бронирования рабочих мест и переговорных комнат
 servers:
-  - url: /api/v1
+  - url: https://quiet-lynx-29.api.mockz.io/openapi/
 paths:
   /places:
     get:
