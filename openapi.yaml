@@ -140,7 +140,7 @@ components:
           type: boolean
     BookingCreate:
       type: object
-      required: [resource_id, start_time, end_time]
+      required: [place_uid, start_time, end_time]
       properties:
         user_uid:
           type: string
