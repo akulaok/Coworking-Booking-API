@@ -1,0 +1,156 @@
+openapi: 3.0.3
+info:
+  title: Coworking Booking API
+  version: 1.0.0
+  description: API для бронирования рабочих мест и переговорных комнат
+servers:
+  - url: /api/v1
+paths:
+  /places:
+    get:
+      summary: Получить список всех мест в коворкиге
+      description: Возвращает рабочие места и комнаты в коворкинге
+      tags: [Resources]
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Resource'
+    post:
+      summary: Создать новый ресурс (Админ)
+      description: Добавляет новое рабочее место или переговорную комнату
+      tags: [Admin]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceCreate'
+      responses:
+        '201':
+          description: Место создано
+
+  /places/{uid}:
+    patch:
+      summary: Обновить данные ресурса (Админ)
+      description: Изменяет характеристики существующего места
+      tags: [Admin]
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceUpdate'
+      responses:
+        '200':
+          description: Ресурс обновлен
+
+  /bookings:
+    get:
+      summary: Получить мои бронирования
+      description: Возвращает список бронирований текущего пользователя
+      tags: [Bookings]
+      responses:
+        '200':
+          description: Список бронирований
+    post:
+      summary: Создать бронирование
+      description: Бронирует выбранный ресурс на указанное время
+      tags: [Bookings]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingCreate'
+      responses:
+        '201':
+          description: Бронирование создано
+        '409':
+          description: Конфликт времени (ресурс уже занят)
+
+  /bookings/{uid}:
+    delete:
+      summary: Отменить бронирование
+      description: Отменяет активное бронирование по его ID
+      tags: [Bookings]
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Бронирование успешно отменено
+        '404':
+          description: Бронирование не найдено
+
+  /admin/bookings:
+    get:
+      summary: Получить все бронирования (Админ)
+      description: Возвращает полный список бронирований для управления загрузкой
+      tags: [Admin]
+      responses:
+        '200':
+          description: Полный список бронирований
+
+components:
+  schemas:
+    Resource:
+      type: object
+      properties:
+        uid:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+          enum: [workspace, meeting_room]
+        is_available:
+          type: boolean
+    ResourceCreate:
+      type: object
+      required: [name, type]
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [workspace, meeting_room]
+    ResourceUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        is_available:
+          type: boolean
+    BookingCreate:
+      type: object
+      required: [resource_id, start_time, end_time]
+      properties:
+        user_uid:
+          type: string
+          format: uuid
+        place_uid:
+          type: string
+          format: uuid
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
